@@ -18,6 +18,7 @@ sudo netfilter-persistent save || true
 # --- Step 2: Ask Details for Configuration---
 read -p "🖥️Enter Username for Marzban (default:admin) " USERS
 read -p "🔑Enter Password for Marzban (default admin): " PASSWD
+read -p "🔌 Enter port for Marzban (default 443): " PORT
 
 USERS=${USERS:-admin}
 PASSWD=${PASSWD:-admin}
