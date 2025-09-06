@@ -151,7 +151,7 @@ done
 # --- Step 5: Download Custom Subscription Template ---
 echo "⬇️ Downloading custom subscription template..."
 sudo mkdir -p /var/lib/marzban/templates/subscription
-sudo wget -O /var/lib/marzban/templates/subscription/index.html https://github.com/MuhammadAshouri/marzban-templates/blob/d0caed6f7b8e4d6f21c60c9a7330bf542dbe7515/template-01/index.html
+sudo wget -O /var/lib/marzban/templates/subscription/index.html https://raw.githubusercontent.com/Lordgrim77/Junk/MarzbanAuto/index.html
 
 # --- Step 6: Configure .env ---
 ENV_FILE="/opt/marzban/.env"
