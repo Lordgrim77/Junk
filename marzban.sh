@@ -16,7 +16,6 @@ sudo nft flush ruleset || true
 sudo netfilter-persistent save || true
 
 # --- Step 2: Ask Details for Configuration---
-read -p "🔌 Enter Port for Marzban (default 8000): " PORT
 read -p "🖥️Enter Username for Marzban (default:admin) " USERS
 read -p "🔑Enter Password for Marzban (default admin): " PASSWD
 
@@ -25,35 +24,39 @@ PASSWD=${PASSWD:-admin}
 PORT=${PORT:-8000}
 
 # --- Step 3: SSL Options ---
-echo "Choose SSL installation method:"
-echo "1. SSL Certificate (Non-Cloudflare)"
-echo "2. Cloudflare SSL Certificate"
-read -p "Select option (1 or 2): " SSL_OPTION
+while true; do
+  echo "Choose SSL installation method:"
+  echo "1. SSL Certificate (Non-Cloudflare)"
+  echo "2. Cloudflare SSL Certificate "
+  read -p "Select option (1 or 2): " SSL_OPTION
 
-if [ "$SSL_OPTION" -eq 1 ]; then
-  # --- Non-Cloudflare SSL ---
-  read -p "🌐 Enter your Domain (e.g. example.com): " DOMAIN
-  echo "🔑 Obtaining SSL certificate..."
-  sudo apt update
-  sudo apt install -y certbot
-  sudo certbot certonly --standalone -d $DOMAIN --register-unsafely-without-email --agree-tos --non-interactive
+  if [ "$SSL_OPTION" -eq 1 ]; then
+    # --- Non-Cloudflare SSL ---
+    read -p "🌐 Enter your domain (e.g. panel.example.com): " DOMAIN
+    echo "🔑 Obtaining Non-Cloudflare SSL certificate..."
+    sudo apt update
+    sudo apt install -y certbot
+    sudo certbot certonly --standalone -d $DOMAIN --register-unsafely-without-email --agree-tos --non-interactive
 
-  # --- Copy SSL Certs ---
-  echo "📂 Copying Non-Cloudflare SSL certs..."
-  sudo mkdir -p /var/lib/marzban/certs
-  sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /var/lib/marzban/certs/Fullchain.pem
-  sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /var/lib/marzban/certs/Key.pem
+    # --- Copy SSL Certs ---
+    echo "📂 Copying Non-Cloudflare SSL certs..."
+    sudo mkdir -p /var/lib/marzban/certs
+    sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /var/lib/marzban/certs/Fullchain.pem
+    sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /var/lib/marzban/certs/Key.pem
 
-  # --- Step 4: Set Up SSL Auto-Renewal (cron job) ---
-  echo "⏳ Setting up SSL certificate auto-renewal..."
-  (sudo crontab -l ; echo "0 0 * * * certbot renew --quiet && systemctl reload nginx") | sudo crontab -
+    # --- Step 4: Set Up SSL Auto-Renewal (cron job) ---
+    echo "⏳ Setting up SSL certificate auto-renewal..."
+    (sudo crontab -l ; echo "0 0 * * * certbot renew --quiet && systemctl reload nginx") | sudo crontab -
 
-elif [ "$SSL_OPTION" -eq 2 ]; then
-  # --- Cloudflare SSL ---
-  echo "🔑 Installing Cloudflare SSL..."
-  # Run your Cloudflare SSL installation script here
+    break  # Exit the loop if SSL is selected successfully
+
+  elif [ "$SSL_OPTION" -eq 2 ]; then
+    # --- Cloudflare SSL ---
+    echo "🔑 Installing Cloudflare SSL..."
+    # Run your Cloudflare SSL installation script here
+    #!/bin/bash
+
 # Function to log messages
-
 log() {
     echo -e "[INFO] $1"
 }
@@ -134,10 +137,13 @@ main() {
 # Execute script
 main
 
-else
-  echo "❌ Invalid option. Please select 1 or 2."
-  exit 1
-fi
+    break  # Exit the loop if Cloudflare SSL is selected
+
+  else
+    echo "❌ Invalid option. Please select 1 or 2."
+    # Loop again for valid input
+  fi
+done
 
 # --- Step 5: Download Custom Subscription Template ---
 echo "⬇️ Downloading custom subscription template..."
