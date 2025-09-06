@@ -56,7 +56,7 @@ while true; do
   elif [ "$SSL_OPTION" -eq 2 ]; then
     # --- Cloudflare SSL ---
     echo "🔑 Installing Cloudflare SSL..."
-    # Run your Cloudflare SSL installation script here
+
     #!/bin/bash
 
 # Function to log messages
@@ -89,7 +89,7 @@ get_cf_credentials() {
 
 # Request user input for domain
 get_domain() {
-    read -p "Enter the domain you want to secure (e.g., example.com): " DOMAIN
+    read -p "Enter the domain you want to secure (e.g., example.com): " CF_Domain
 }
 
 # Set Let's Encrypt as the default CA
@@ -99,17 +99,17 @@ set_letsencrypt() {
 
 # Issue SSL certificate
 issue_certificate() {
-    log "Issuing SSL certificate for ${DOMAIN}..."
-    ~/.acme.sh/acme.sh --issue --dns dns_cf -d "$DOMAIN" -d "*.$DOMAIN" --log || error "Certificate issuance failed"
+    log "Issuing SSL certificate for ${CF_Domain}..."
+    ~/.acme.sh/acme.sh --issue --dns dns_cf -d "$CF_Domain" -d "*.$CF_Domain" --log || error "Certificate issuance failed"
 }
 
 # Install the certificate
 install_certificate() {
-    certPath="/var/lib/marzban/certs"
+    certPath="var/lib/marzban/certs"
     mkdir -p "$certPath"
 
     log "Installing SSL certificate..."
-    ~/.acme.sh/acme.sh --installcert -d "$DOMAIN" -d "*.$DOMAIN" \
+    ~/.acme.sh/acme.sh --installcert -d "$CF_Domain" -d "*.$CF_Domain" \
         --fullchain-file "$certPath/fullchain.pem" \
         --key-file "$certPath/key.pem" || error "Certificate installation failed"
 
@@ -139,6 +139,7 @@ main() {
 
 # Execute script
 main
+    
 
     break  # Exit the loop if Cloudflare SSL is selected
 
