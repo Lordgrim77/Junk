@@ -16,13 +16,15 @@ sudo nft flush ruleset || true
 sudo netfilter-persistent save || true
 
 # --- Step 2: Ask Details for Configuration---
-read -p "🖥️Enter Username for Marzban (default:admin) " USERS
+read -p "🖥️Enter Username for Marzban (default admin): " USERS
 read -p "🔑Enter Password for Marzban (default admin): " PASSWD
 read -p "🔌 Enter port for Marzban (default 8000): " PORT
+read -p "📂 Enter dashboard path(default dashboard: " PATH
 
 USERS=${USERS:-admin}
 PASSWD=${PASSWD:-admin}
 PORT=${PORT:-8000}
+PATH=${PATH:-dashboard}
 
 # --- Step 3: SSL Options ---
 while true; do
@@ -158,6 +160,7 @@ echo "⚙️ Configuring .env..."
 sudo sed -i "s|^UVICORN_PORT.*|UVICORN_PORT = $PORT|" $ENV_FILE
 sudo sed -i "s|^# SUDO_USERNAME.*|SUDO_USERNAME= $USERS|" $ENV_FILE
 sudo sed -i "s|^# SUDO_PASSWORD.*|SUDO_PASSWORD= $PASSWD|" $ENV_FILE
+sudo sed -i "s|^# DASHBOARD_PATH.*|DASHBOARD_PATH= \"/$PATH/\"|" $ENV_FILE
 sudo sed -i "s|^# UVICORN_SSL_CERTFILE.*|UVICORN_SSL_CERTFILE = \"/var/lib/marzban/certs/fullchain.pem\"|" $ENV_FILE
 sudo sed -i "s|^# UVICORN_SSL_KEYFILE.*|UVICORN_SSL_KEYFILE = \"/var/lib/marzban/certs/key.pem\"|" $ENV_FILE
 sudo sed -i "s|^# XRAY_SUBSCRIPTION_URL_PREFIX.*|XRAY_SUBSCRIPTION_URL_PREFIX = \"https://$DOMAIN:$PORT\"|" $ENV_FILE
@@ -166,7 +169,7 @@ sudo sed -i "s|^# SUBSCRIPTION_PAGE_TEMPLATE.*|SUBSCRIPTION_PAGE_TEMPLATE=\"subs
 
 
 echo "✅ Configuration finished!"
-echo "🔗 Access panel: https://$DOMAIN:$PORT/dashboard"
+echo "🔗 Access panel: https://$DOMAIN:$PORT/$PATH"
 echo "🖥️ User Name: $USERS"
 echo "🔑 Password: $PASSWD"
 echo "Script by 𝙇𝙊𝙍𝘿 𝙂𝙍𝙄𝙈 ᶻ 𝗓 𐰁 .ᐟ❤️"
