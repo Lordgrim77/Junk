@@ -111,7 +111,7 @@ install_certificate() {
     mkdir -p "$certPath"
 
     log "Installing SSL certificate..."
-    ~/.acme.sh/acme.sh --installcert -d "$" -d "*.$DOMAIN" \
+    ~/.acme.sh/acme.sh --installcert -d "$DOMAIN" -d "*.$DOMAIN" \
         --fullchain-file "$certPath/fullchain.pem" \
         --key-file "$certPath/key.pem" || error "Certificate installation failed"
 
