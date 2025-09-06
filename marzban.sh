@@ -8,12 +8,14 @@ set -e
 
 echo "=== ⚙️ Marzban Auto Configuration ==="
 
-# --- Step 1: Disable Firewalls ---
+# --- Step 1: Disable Firewalls & Install requirements ---
 echo "🔧 Disabling firewalls..."
 sudo ufw disable || true
 sudo iptables -F || true
 sudo nft flush ruleset || true
 sudo netfilter-persistent save || true
+sudo apt update || true
+sudo apt install -y curl wget bash socat || true
 
 # --- Step 2: Ask Details for Configuration---
 read -p "🖥️Enter Username for Marzban (default admin): " USERS
