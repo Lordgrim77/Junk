@@ -18,7 +18,7 @@ sudo netfilter-persistent save || true
 # --- Step 2: Ask Details for Configuration---
 read -p "🖥️Enter Username for Marzban (default:admin) " USERS
 read -p "🔑Enter Password for Marzban (default admin): " PASSWD
-read -p "🔌 Enter port for Marzban (default 443): " PORT
+read -p "🔌 Enter port for Marzban (default 8000): " PORT
 
 USERS=${USERS:-admin}
 PASSWD=${PASSWD:-admin}
@@ -103,7 +103,7 @@ issue_certificate() {
 
 # Install the certificate
 install_certificate() {
-    certPath="/var/lib/marzban/certs/"
+    certPath="/var/lib/marzban/certs"
     mkdir -p "$certPath"
 
     log "Installing SSL certificate..."
