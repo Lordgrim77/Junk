@@ -16,7 +16,6 @@ sudo nft flush ruleset || true
 sudo netfilter-persistent save || true
 
 # --- Step 2: Ask Details for Configuration---
-read -p "🌐 Enter your Domain (e.g. panel.example.com): " DOMAIN
 read -p "🔌 Enter Port for Marzban (default 8000): " PORT
 read -p "🖥️Enter Username for Marzban (default:admin) " USERS
 read -p "🔑Enter Password for Marzban (default admin): " PASSWD
@@ -25,18 +24,120 @@ USERS=${USERS:-admin}
 PASSWD=${PASSWD:-admin}
 PORT=${PORT:-8000}
 
-# --- Step 3: Install Certbot & Obtain SSL ---
-echo "🔑 Obtaining SSL certificate..."
-sudo apt update
-sudo apt install -y certbot
+# --- Step 3: SSL Options ---
+echo "Choose SSL installation method:"
+echo "1. SSL Certificate (Non-Cloudflare)"
+echo "2. Cloudflare SSL Certificate"
+read -p "Select option (1 or 2): " SSL_OPTION
 
-sudo certbot certonly --standalone -d $DOMAIN --register-unsafely-without-email --agree-tos --non-interactive
+if [ "$SSL_OPTION" -eq 1 ]; then
+  # --- Non-Cloudflare SSL ---
+  read -p "🌐 Enter your Domain (e.g. example.com): " DOMAIN
+  echo "🔑 Obtaining SSL certificate..."
+  sudo apt update
+  sudo apt install -y certbot
+  sudo certbot certonly --standalone -d $DOMAIN --register-unsafely-without-email --agree-tos --non-interactive
 
-# --- Step 4: Copy SSL Certs ---
-echo "📂 Copying SSL certs..."
-sudo mkdir -p /var/lib/marzban/certs
-sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /var/lib/marzban/certs/Fullchain.pem
-sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /var/lib/marzban/certs/Key.pem
+  # --- Copy SSL Certs ---
+  echo "📂 Copying Non-Cloudflare SSL certs..."
+  sudo mkdir -p /var/lib/marzban/certs
+  sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /var/lib/marzban/certs/Fullchain.pem
+  sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /var/lib/marzban/certs/Key.pem
+
+  # --- Step 4: Set Up SSL Auto-Renewal (cron job) ---
+  echo "⏳ Setting up SSL certificate auto-renewal..."
+  (sudo crontab -l ; echo "0 0 * * * certbot renew --quiet && systemctl reload nginx") | sudo crontab -
+
+elif [ "$SSL_OPTION" -eq 2 ]; then
+  # --- Cloudflare SSL ---
+  echo "🔑 Installing Cloudflare SSL..."
+  # Run your Cloudflare SSL installation script here
+# Function to log messages
+
+log() {
+    echo -e "[INFO] $1"
+}
+
+error() {
+    echo -e "[ERROR] $1" >&2
+    exit 1
+}
+
+# Install acme.sh if not installed
+install_acme() {
+    if ! command -v ~/.acme.sh/acme.sh &>/dev/null; then
+        log "Installing acme.sh..."
+        curl https://get.acme.sh | sh || error "Failed to install acme.sh"
+        source ~/.bashrc
+    fi
+}
+
+# Request user input for Cloudflare API details
+get_cf_credentials() {
+    read -p "Enter your Cloudflare Global API Key: " CF_Key
+    read -p "Enter your Cloudflare registered email: " CF_Email
+
+    export CF_Key
+    export CF_Email
+}
+
+# Request user input for domain
+get_domain() {
+    read -p "Enter the domain you want to secure (e.g., example.com): " DOMAIN
+}
+
+# Set Let's Encrypt as the default CA
+set_letsencrypt() {
+    ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt || error "Failed to set Let's Encrypt as default CA"
+}
+
+# Issue SSL certificate
+issue_certificate() {
+    log "Issuing SSL certificate for ${DOMAIN}..."
+    ~/.acme.sh/acme.sh --issue --dns dns_cf -d "$DOMAIN" -d "*.$DOMAIN" --log || error "Certificate issuance failed"
+}
+
+# Install the certificate
+install_certificate() {
+    certPath="/var/lib/marzban/certs/"
+    mkdir -p "$certPath"
+
+    log "Installing SSL certificate..."
+    ~/.acme.sh/acme.sh --installcert -d "$DOMAIN" -d "*.$DOMAIN" \
+        --fullchain-file "$certPath/fullchain.pem" \
+        --key-file "$certPath/key.pem" || error "Certificate installation failed"
+
+    log "Certificate installed successfully!"
+    ls -lah "$certPath"
+    chmod 755 "$certPath"
+}
+
+# Enable auto-renewal
+enable_auto_renewal() {
+    log "Enabling automatic certificate renewal..."
+    ~/.acme.sh/acme.sh --upgrade --auto-upgrade || error "Auto-renewal setup failed"
+}
+
+# Main function to execute all steps
+main() {
+    install_acme
+    get_cf_credentials
+    get_domain
+    set_letsencrypt
+    issue_certificate
+    install_certificate
+    enable_auto_renewal
+
+    log "SSL certificate setup complete!"
+}
+
+# Execute script
+main
+
+else
+  echo "❌ Invalid option. Please select 1 or 2."
+  exit 1
+fi
 
 # --- Step 5: Download Custom Subscription Template ---
 echo "⬇️ Downloading custom subscription template..."
