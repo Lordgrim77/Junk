@@ -108,8 +108,8 @@ install_certificate() {
 
     log "Installing SSL certificate..."
     ~/.acme.sh/acme.sh --installcert -d "$DOMAIN" -d "*.$DOMAIN" \
-        --fullchain-file "$certPath/fullchain.pem" \
-        --key-file "$certPath/key.pem" || error "Certificate installation failed"
+        --fullchain-file "$certPath/Fullchain.pem" \
+        --key-file "$certPath/Key.pem" || error "Certificate installation failed"
 
     log "Certificate installed successfully!"
     ls -lah "$certPath"
