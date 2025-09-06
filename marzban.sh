@@ -161,14 +161,14 @@ ENV_FILE="/opt/marzban/.env"
 
 echo "⚙️ Configuring .env..."
 sudo sed -i "s|^UVICORN_PORT.*|UVICORN_PORT = $PORT|" $ENV_FILE
-sudo sed -i "s|^# SUDO_USERNAME.*|SUDO_USERNAME= $USERS|" $ENV_FILE
-sudo sed -i "s|^# SUDO_PASSWORD.*|SUDO_PASSWORD= $PASSWD|" $ENV_FILE
-sudo sed -i "s|^# DASHBOARD_PATH.*|DASHBOARD_PATH= \"/$DPATH/\"|" $ENV_FILE
+sudo sed -i "s|^# SUDO_USERNAME.*|SUDO_USERNAME = $USERS|" $ENV_FILE
+sudo sed -i "s|^# SUDO_PASSWORD.*|SUDO_PASSWORD = $PASSWD|" $ENV_FILE
+sudo sed -i "s|^# DASHBOARD_PATH.*|DASHBOARD_PATH = \"/$DPATH/\"|" $ENV_FILE
 sudo sed -i "s|^# UVICORN_SSL_CERTFILE.*|UVICORN_SSL_CERTFILE = \"/var/lib/marzban/certs/fullchain.pem\"|" $ENV_FILE
 sudo sed -i "s|^# UVICORN_SSL_KEYFILE.*|UVICORN_SSL_KEYFILE = \"/var/lib/marzban/certs/key.pem\"|" $ENV_FILE
 sudo sed -i "s|^# XRAY_SUBSCRIPTION_URL_PREFIX.*|XRAY_SUBSCRIPTION_URL_PREFIX = \"https://$DOMAIN:$PORT\"|" $ENV_FILE
-sudo sed -i "s|^# CUSTOM_TEMPLATES_DIRECTORY.*|CUSTOM_TEMPLATES_DIRECTORY= \"/var/lib/marzban/templates/\"|" $ENV_FILE
-sudo sed -i "s|^# SUBSCRIPTION_PAGE_TEMPLATE.*|SUBSCRIPTION_PAGE_TEMPLATE= \"subscription/index.html\"|" $ENV_FILE
+sudo sed -i "s|^# CUSTOM_TEMPLATES_DIRECTORY.*|CUSTOM_TEMPLATES_DIRECTORY = \"/var/lib/marzban/templates/\"|" $ENV_FILE
+sudo sed -i "s|^# SUBSCRIPTION_PAGE_TEMPLATE.*|SUBSCRIPTION_PAGE_TEMPLATE = \"subscription/index.html\"|" $ENV_FILE
 
 
 echo "✅ Configuration finished!"
