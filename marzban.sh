@@ -42,8 +42,8 @@ while true; do
     # --- Copy SSL Certs ---
     echo "📂 Copying Non-Cloudflare SSL certs..."
     sudo mkdir -p /var/lib/marzban/certs
-    sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /var/lib/marzban/certs/Fullchain.pem
-    sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /var/lib/marzban/certs/Key.pem
+    sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /var/lib/marzban/certs/fullchain.pem
+    sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /var/lib/marzban/certs/key.pem
 
     # --- Step 4: Set Up SSL Auto-Renewal (cron job) ---
     echo "⏳ Setting up SSL certificate auto-renewal..."
@@ -108,8 +108,8 @@ install_certificate() {
 
     log "Installing SSL certificate..."
     ~/.acme.sh/acme.sh --installcert -d "$DOMAIN" -d "*.$DOMAIN" \
-        --fullchain-file "$certPath/Fullchain.pem" \
-        --key-file "$certPath/Key.pem" || error "Certificate installation failed"
+        --fullchain-file "$certPath/fullchain.pem" \
+        --key-file "$certPath/key.pem" || error "Certificate installation failed"
 
     log "Certificate installed successfully!"
     ls -lah "$certPath"
@@ -158,8 +158,8 @@ echo "⚙️ Configuring .env..."
 sudo sed -i "s|^UVICORN_PORT.*|UVICORN_PORT = $PORT|" $ENV_FILE
 sudo sed -i "s|^# SUDO_USERNAME.*|SUDO_USERNAME= $USERS|" $ENV_FILE
 sudo sed -i "s|^# SUDO_PASSWORD.*|SUDO_PASSWORD= $PASSWD|" $ENV_FILE
-sudo sed -i "s|^# UVICORN_SSL_CERTFILE.*|UVICORN_SSL_CERTFILE = \"/var/lib/marzban/certs/Fullchain.pem\"|" $ENV_FILE
-sudo sed -i "s|^# UVICORN_SSL_KEYFILE.*|UVICORN_SSL_KEYFILE = \"/var/lib/marzban/certs/Key.pem\"|" $ENV_FILE
+sudo sed -i "s|^# UVICORN_SSL_CERTFILE.*|UVICORN_SSL_CERTFILE = \"/var/lib/marzban/certs/fullchain.pem\"|" $ENV_FILE
+sudo sed -i "s|^# UVICORN_SSL_KEYFILE.*|UVICORN_SSL_KEYFILE = \"/var/lib/marzban/certs/key.pem\"|" $ENV_FILE
 sudo sed -i "s|^# XRAY_SUBSCRIPTION_URL_PREFIX.*|XRAY_SUBSCRIPTION_URL_PREFIX = \"https://$DOMAIN:$PORT\"|" $ENV_FILE
 sudo sed -i "s|^# CUSTOM_TEMPLATES_DIRECTORY.*|CUSTOM_TEMPLATES_DIRECTORY=\"/var/lib/marzban/templates/\"|" $ENV_FILE
 sudo sed -i "s|^# SUBSCRIPTION_PAGE_TEMPLATE.*|SUBSCRIPTION_PAGE_TEMPLATE=\"subscription/index.html\"|" $ENV_FILE
