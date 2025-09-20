@@ -102,7 +102,7 @@ set_letsencrypt() {
 # Issue SSL certificate
 issue_certificate() {
     log "Issuing SSL certificate for ${DOMAIN}..."
-    ~/.acme.sh/acme.sh --issue --dns dns_cf -d "$DOMAIN" -d "*.$DOMAIN" --log || error "Certificate issuance failed"
+    ~/.acme.sh/acme.sh --issue --dns dns_cf -d "$DOMAIN" -d "*.$DOMAIN" --log --force || error "Certificate issuance failed"
 }
 
 # Install the certificate
